@@ -200,22 +200,46 @@
       $.ui.sortable.prototype._mouseStop.apply(this, arguments);
     },//_mouseStop
     serialize: function(o) {
-      var items = this._getItemsAsjQuery(o && o.connected),
-      str = []; o = o || {};
+      // 'o' is a hash of the options of the plugin (?)
 
+      // items is an array the dom elements lifted from the page, so we can work on them.
+      // It looks something like [li#menu_item_37.menu_item, li#menu_item_38.menu_item, ...]
+      var items = this._getItemsAsjQuery(o && o.connected),
+        str = []; o = o || {};
+
+      // Now we go through each of these items
       $(items).each(function() {
         var res = ($(o.item || this).attr(o.attribute || 'id') || '')
-        .match(o.expression || (/(.+)[-=_](.+)/)),
-        pid = ($(o.item || this).parent(o.listType)
-          .parent('li')
-          .attr(o.attribute || 'id') || '')
-          .match(o.expression || (/(.+)[-=_](.+)/));
+          .match(
+            o.expression || (/(.+)[-=_](.+)/)),
+            pid = ($(o.item || this).parent(o.listType)
+              .parent('li')
+              .attr(o.attribute || 'id') || '')
+              .match(o.expression || (/(.+)[-=_](.+)/));
 
-      if (res) {
-        str.push((o.key || res[1] + '[' + (o.key && o.expression ? res[1] : res[2]) + ']')
-          + '='
-          + (pid ? (o.key && o.expression ? pid[1] : pid[2]) : 'root'));
-      }
+        // At this point...
+        // 'res' looks like this: ["menu_item_47", "menu_item", "47"]
+        // pid looks like this, IF the item (res) has a parent: ["menu_item_46", "menu_item", "46"] 
+
+        // Here we setup the response's parent_id
+        if (res) {
+          // Updated the following line to have res[0] (instead of res[2]), which will make the itemName be menu_item_47
+          itemName = (o.key && o.expression ? res[1] : res[0]);
+
+          // itemScope looks like this: menu_item[menu_item_37]
+          itemScope = o.key || res[1] + '[' + itemName + ']'
+
+          //create the parentId string, which will look like menu_item[menu_item_37][parent_id]=root
+          parentStr = itemScope + '[parent_id]=' + (pid ? (o.key && o.expression ? pid[1] : pid[2]) : 'root')
+
+          //create the position string, which will look like menu_item[menu_item_37][position]=0
+          //this is 0-based position
+          positionStr = itemScope + '[position]=' + $(this).index();
+
+          //push the parentStr and positionStr strings into the str array
+          str.push(parentStr);
+          str.push(positionStr);
+        }
       });
 
       if(!str.length && o.key) {
