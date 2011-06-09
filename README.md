@@ -48,7 +48,7 @@ Please note: every `<li>` must have either one or two direct children, the first
 
 <dl>
 	<dt>serialize</dt>
-	<dd>Serializes the nested list into a string like <b>setName[item1Id]=parentId&setName[item2Id]=parentId</b>, reading from each item's id formatted as 'setName_itemId' (where itemId is a number).
+	<dd>Serializes the nested list into a string like <code>setName[setName_item1Id][parent_id]=parentId&setName[setName_item1Id][position]=position...</code>, reading from each item's id formatted as 'setName_itemId' (where itemId is a number).
 	It accepts the same options as the original Sortable method (<b>key</b>, <b>attribute</b> and <b>expression</b>).</dd>
 	<dt>toArray</dt>
 	<dd>Builds an array where each element is in the form:
